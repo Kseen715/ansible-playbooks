@@ -119,10 +119,10 @@
         ports:
           - "{{ ovpn_ui_port }}:8080/tcp"
         volumes:
-          - /usr/bin/openvpn-ui/:/etc/openvpn
-          - /usr/bin/openvpn-ui/db:/opt/openvpn-ui/db
-          - /usr/bin/openvpn/pki:/usr/share/easy-rsa/pki
-          - /var/run/docker.sock:/var/run/docker.sock:ro
+           - "./:{{ ovpn_path }}"
+           - "./db:{{ ovpn_ui_path }}/db"
+           - "./pki:{{ ovpn_ui_path }}/easy-rsa/pki"
+           - "/var/run/docker.sock:{{ ovpn_ui_path }}/run/docker.sock:ro"
         restart_policy: always
         container_default_behavior: no_defaults
 
@@ -144,13 +144,14 @@
           GUEST_SUB: '{{ ovpn_guest_subnet }}'
           HOME_SUB: '{{ ovpn_home_subnet }}'
         volumes:
-          - /usr/bin/openvpn/pki:/etc/openvpn/pki
-          - /usr/bin/openvpn/clients:/etc/openvpn/clients
-          - /usr/bin/openvpn/config:/etc/openvpn/config
-          - /usr/bin/openvpn/staticclients:/etc/openvpn/staticclients
-          - /usr/bin/openvpn/log:/var/log/openvpn
-          - /usr/bin/openvpn/fw-rules.sh:/opt/app/fw-rules.sh
-          - /usr/bin/openvpn/server.conf:/etc/openvpn/server.conf
+           - "./pki:{{ ovpn_path }}/pki"
+           - "./clients:{{ ovpn_path }}/clients"
+           - "./config:{{ ovpn_path }}/config"
+           - "./staticclients:{{ ovpn_path }}/staticclients"
+           - "./log:{{ ovpn_path }}/log/openvpn"
+           - "./fw-rules.sh:{{ ovpn_path }}/opt/app/fw-rules.sh"
+           - "./checkpsw.sh:{{ ovpn_path }}/opt/app/checkpsw.sh"
+           - "./server.conf:{{ ovpn_path }}/server.conf"
         capabilities:
           - NET_ADMIN
         restart_policy: always
