@@ -108,7 +108,7 @@
     - name: Deploy openvpn
       become: yes
       vars:
-        ansible_python_interpreter:"{{ python3_venv_path }}/bin/python3"
+        ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
       docker_container:
         name: openvpn
         image: d3vilh/openvpn-server:latest
@@ -137,7 +137,7 @@
     - name: Deploy openvpn-ui
       become: yes
       vars:
-        ansible_python_interpreter:"{{ python3_venv_path }}/bin/python3"
+        ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
       docker_container:
         name: openvpn-ui
         image: d3vilh/openvpn-ui:latest
