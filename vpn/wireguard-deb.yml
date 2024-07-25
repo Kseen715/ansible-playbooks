@@ -1,0 +1,142 @@
+## Ansible playbook to install WireGuard GUI on a Debian-based system
+
+- name: Install WireGuard+GUI
+  become: yes
+  vars:
+    host_group: localhost
+    # Your 'hosts', can be a group or a single host, e.g. 'localhost' if
+    # you want to run the playbook on the local machine.
+
+    wg_gui_password: PASSWORD_HERE
+    # Will be used to access the WireGuard GUI.
+
+    wg_path: /usr/bin/wireguard
+    # WireGuard configuration files.
+
+    ss_password: PASSWORD_HERE
+    # Will be used to connect to the shadowsocks server.
+
+    ss_method: aes-256-gcm
+    # Shadowsocks encrypt method: rc4-md5,
+    # aes-128-gcm, aes-192-gcm, aes-256-gcm,
+    # aes-128-cfb, aes-192-cfb, aes-256-cfb,
+    # aes-128-ctr, aes-192-ctr, aes-256-ctr,
+    # camellia-128-cfb, camellia-192-cfb,
+    # camellia-256-cfb, bf-cfb,
+    # chacha20-ietf-poly1305,
+    # xchacha20-ietf-poly1305,
+    # salsa20, chacha20 and chacha20-ietf.
+    # The default cipher is chacha20-ietf-poly1305.
+
+    python3_venv_path: /usr/bin/python3-venv
+    # Virtual environment for Python3. Just leave it as is.
+
+    wg_port: '51820'
+    wg_gui_port: '51821'
+    ss_port: '8388'
+
+  hosts: "{{ host_group }}"
+  tasks:
+
+    - name: Ensure Docker is installed
+      become: yes
+      apt:
+        name: docker.io
+        state: present
+        
+    - name: Start Docker
+      become: yes
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ensure WireGuard directory exists
+      become: yes
+      file:
+        path: "{{ wg_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Ensure python3 is installed
+      become: yes
+      apt:
+        name: python3
+        state: present
+
+    - name: Ensure pip3 is installed
+      become: yes
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Create a virtual environment and install Docker Python library
+      become: yes
+      block:
+        - name: Ensure python3-venv is installed
+          apt:
+            name: python3-venv
+            state: present
+    
+        - name: Create a virtual environment
+          command: python3 -m venv {{ python3_venv_path }}
+          args:
+            creates: "{{ python3_venv_path }}"
+    
+        - name: Install Docker Python library in the virtual environment
+          command: "{{ python3_venv_path }}/bin/pip install docker"
+
+    - name: Deploy WireGuard+GUI
+      become: yes
+      vars:
+        ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
+      docker_container:
+        name: wg-easy
+        image: ghcr.io/wg-easy/wg-easy
+        restart_policy: always
+        ports:
+          - "{{ wg_port }}:51820/udp"
+          - "{{ wg_gui_port }}:51821/tcp"
+        volumes:
+          - "~/.wg-easy:{{ wg_path }}"
+        env:
+          LANG: ru
+          WG_HOST: "{{ ansible_default_ipv4.address }}"
+          PASSWORD: "{{ wg_gui_password }}"
+          PORT: "{{ wg_gui_port }}"
+          WG_PORT: "{{ wg_port }}"
+        capabilities:
+          - NET_ADMIN
+          - SYS_MODULE
+        sysctls:
+          net.ipv4.conf.all.src_valid_mark: 1
+          net.ipv4.ip_forward: 1
+        container_default_behavior: no_defaults
+
+    - name: Install shadowsocks
+      command: docker pull shadowsocks/shadowsocks-libev
+
+    - name: Deploy shadowsocks
+      become: yes
+      vars:
+        ansible_python_interpreter: "/etc/wireguard/venv/bin/python3"
+      docker_container:
+        name: shadowsocks
+        image: shadowsocks/shadowsocks-libev
+        ports:
+          - "{{ ss_port }}:8388"
+          - "{{ ss_port }}:8388/udp"
+        env:
+          PASSWORD: "{{ ss_password }}"
+          METHOD: "{{ ss_method }}"
+        state: started
+        restart_policy: always
+        container_default_behavior: no_defaults
+
+    - name: Print URL to access WireGuard GUI
+      debug:
+        msg: "Access the WireGuard GUI at http://{{ ansible_default_ipv4.address }}:{{ wg_gui_port }} with the password '{{ wg_gui_password }}'"
+
+    - name: Print data to access shadowsocks-libev
+      debug:
+        msg: "To access shadowsocks, use the following data: IP: {{ ansible_host }}, Port: {{ ss_port }}, Password: {{ ss_password }}, Method: {{ ss_method }}"

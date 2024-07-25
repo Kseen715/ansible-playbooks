@@ -1,0 +1,14 @@
+## Ansible playbook to install minimal software on a Debian-based system
+
+- name: Install minimal software on a Debian-based system
+  hosts: localhost
+  tasks:
+    - ping: ~
+    - name: Install htop
+      apt: name=htop state=present
+    - name: Install btop
+      apt: name=btop state=present
+    - name: Install micro
+      apt: name=micro state=present
+    - name: Install neofetch
+      apt: name=neofetch state=present
