@@ -91,14 +91,14 @@
     - name: Ensure OpenVPN directory exists
       become: yes
       file:
-        path: "{{ ovp_path }}"
+        path: "{{ ovpn_path }}"
         state: directory
         mode: '0755'
 
     - name: Ensure OpenVPN UI directory exists
       become: yes
       file:
-        path: "{{ ovp_ui_path }}"
+        path: "{{ ovpn_ui_path }}"
         state: directory
         mode: '0755'
 
@@ -114,11 +114,11 @@
         image: d3vilh/openvpn-server:latest
         privileged: true
         ports: 
-          - "{{ ovp_port }}:1194/udp"
+          - "{{ ovpn_port }}:1194/udp"
         env:
-          TRUST_SUB: '{{ ovp_trust_subnet }}'
-          GUEST_SUB: '{{ ovp_guest_subnet }}'
-          HOME_SUB: '{{ ovp_home_subnet }}'
+          TRUST_SUB: '{{ ovpn_trust_subnet }}'
+          GUEST_SUB: '{{ ovpn_guest_subnet }}'
+          HOME_SUB: '{{ ovpn_home_subnet }}'
         volumes:
           - /usr/bin/openvpn/pki:/etc/openvpn/pki
           - /usr/bin/openvpn/clients:/etc/openvpn/clients
@@ -142,11 +142,11 @@
         name: openvpn-ui
         image: d3vilh/openvpn-ui:latest
         env:
-          OPENVPN_ADMIN_USERNAME: "{{ ovp_ui_username }}"
-          OPENVPN_ADMIN_PASSWORD: "{{ ovp_ui_password }}"
+          OPENVPN_ADMIN_USERNAME: "{{ ovpn_ui_username }}"
+          OPENVPN_ADMIN_PASSWORD: "{{ ovpn_ui_password }}"
         privileged: true
         ports:
-          - "{{ ovp_ui_port }}:8080/tcp"
+          - "{{ ovpn_ui_port }}:8080/tcp"
         volumes:
           - /usr/bin/openvpn-ui/:/etc/openvpn
           - /usr/bin/openvpn-ui/db:/opt/openvpn-ui/db
@@ -160,8 +160,8 @@
 
     - name: Print data to access openvpn
       debug:
-        msg: "To access openvpn, use the following data: IP: {{ ansible_host }}, Port: {{ ovp_port }}"
+        msg: "To access openvpn, use the following data: IP: {{ ansible_host }}, Port: {{ ovpn_port }}"
 
     - name: Print data to access openvpn-ui
       debug:
-        msg: "To access openvpn-ui, use the following data: http://{{ ansible_host }}:{{ ovp_ui_port }} with username: {{ ovp_ui_username }}"
+        msg: "To access openvpn-ui, use the following data: http://{{ ansible_host }}:{{ ovpn_ui_port }} with username: {{ ovpn_ui_username }}"
