@@ -26,14 +26,14 @@
     ovpn_ui_port: '8089'
     # OpenVPN and OpenVPN UI ports.
 
-    ovpn_trust_subnet: 10.0.70/24 
+    ovpn_trust_subnet: '10.0.70/24'
     # Trusted subnet, from which OpenVPN server will assign IPs to trusted 
     # clients (default subnet for all clients) 
 
-    ovpn_guest_subnet: 10.0.71/24
+    ovpn_guest_subnet: '10.0.71/24'
     # Guests subnet for clients with internet access only
 
-    ovpn_home_subnet: 192.168.88/24
+    ovpn_home_subnet: '192.168.88/24'
     # Subnet where the VPN server is located, thru which you get internet 
     # access to the clients with MASQUERADE
 
@@ -116,9 +116,9 @@
         ports: 
           - "{{ ovp_port }}:1194/udp"
         env:
-          TRUST_SUB: 10.0.70/24
-          GUEST_SUB: 10.0.71/24
-          HOME_SUB: 192.168.88/24
+          TRUST_SUB: '{{ ovp_trust_subnet }}'
+          GUEST_SUB: '{{ ovp_guest_subnet }}'
+          HOME_SUB: '{{ ovp_home_subnet }}'
         volumes:
           - /usr/bin/openvpn/pki:/etc/openvpn/pki
           - /usr/bin/openvpn/clients:/etc/openvpn/clients
