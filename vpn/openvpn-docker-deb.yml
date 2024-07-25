@@ -122,7 +122,7 @@
            - "./:{{ ovpn_path }}"
            - "./db:{{ ovpn_ui_path }}/db"
            - "./pki:{{ ovpn_ui_path }}/easy-rsa/pki"
-           - "/var/run/docker.sock:{{ ovpn_ui_path }}/run/docker.sock:ro"
+           - "/var/run/docker.sock:/var/run/docker.sock:ro"
         restart_policy: always
         container_default_behavior: no_defaults
 
@@ -148,9 +148,9 @@
            - "./clients:{{ ovpn_path }}/clients"
            - "./config:{{ ovpn_path }}/config"
            - "./staticclients:{{ ovpn_path }}/staticclients"
-           - "./log:{{ ovpn_path }}/log/openvpn"
-           - "./fw-rules.sh:{{ ovpn_path }}/opt/app/fw-rules.sh"
-           - "./checkpsw.sh:{{ ovpn_path }}/opt/app/checkpsw.sh"
+           - "./log:var/log/openvpn"
+           - "./fw-rules.sh:/opt/app/fw-rules.sh"
+           - "./checkpsw.sh:/opt/app/checkpsw.sh"
            - "./server.conf:{{ ovpn_path }}/server.conf"
         capabilities:
           - NET_ADMIN
