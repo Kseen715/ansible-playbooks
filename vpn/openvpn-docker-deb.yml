@@ -22,7 +22,7 @@
     python3_venv_path: /usr/bin/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
-    ovpn_port: '8389'
+    ovpn_port: '1194' # DO NOT CHANGE
     ovpn_ui_port: '8089'
     # OpenVPN and OpenVPN UI ports.
 
@@ -102,6 +102,30 @@
         state: directory
         mode: '0755'
 
+    - name: Install openvpn-ui
+      command: docker pull d3vilh/openvpn-ui:latest
+
+    - name: Deploy openvpn-ui
+      become: yes
+      vars:
+        ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
+      docker_container:
+        name: openvpn-ui
+        image: d3vilh/openvpn-ui:latest
+        env:
+          OPENVPN_ADMIN_USERNAME: "{{ ovpn_ui_username }}"
+          OPENVPN_ADMIN_PASSWORD: "{{ ovpn_ui_password }}"
+        privileged: true
+        ports:
+          - "{{ ovpn_ui_port }}:8080/tcp"
+        volumes:
+          - /usr/bin/openvpn-ui/:/etc/openvpn
+          - /usr/bin/openvpn-ui/db:/opt/openvpn-ui/db
+          - /usr/bin/openvpn/pki:/usr/share/easy-rsa/pki
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        restart_policy: always
+        container_default_behavior: no_defaults
+
     - name: Install openvpn
       command: docker pull d3vilh/openvpn-server:latest
 
@@ -131,30 +155,8 @@
           - NET_ADMIN
         restart_policy: always
         container_default_behavior: no_defaults
-
-    - name: Install openvpn-ui
-      command: docker pull d3vilh/openvpn-ui:latest
-
-    - name: Deploy openvpn-ui
-      become: yes
-      vars:
-        ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
-      docker_container:
-        name: openvpn-ui
-        image: d3vilh/openvpn-ui:latest
-        env:
-          OPENVPN_ADMIN_USERNAME: "{{ ovpn_ui_username }}"
-          OPENVPN_ADMIN_PASSWORD: "{{ ovpn_ui_password }}"
-        privileged: true
-        ports:
-          - "{{ ovpn_ui_port }}:8080/tcp"
-        volumes:
-          - /usr/bin/openvpn-ui/:/etc/openvpn
-          - /usr/bin/openvpn-ui/db:/opt/openvpn-ui/db
-          - /usr/bin/openvpn-ui/pki:/usr/share/easy-rsa/pki
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        restart_policy: always
-        container_default_behavior: no_defaults
+        depends_on:
+          - "openvpn-ui"
 
     - name: Clear apt cache
       apt:
