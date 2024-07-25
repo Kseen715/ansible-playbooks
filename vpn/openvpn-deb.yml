@@ -1,0 +1,167 @@
+## Ansible playbook to install OpenVPN + GUI on a Debian-based system
+
+- name: Install shadowsocks-libev
+  become: yes
+  
+  # ============================================================================
+  vars:
+    host_group: localhost
+    # Your 'hosts', can be a group or a single host, e.g. 'localhost' if
+    # you want to run the playbook on the local machine.
+
+    opvn_ui_username: admin
+    opvn_ui_password: PASSWORD_HERE
+    # Will be used to access the openvpn-ui.
+
+    ovpn_path: /usr/bin/openvpn
+    # OpenVPN configuration files.
+
+    ovpn_ui_path: /usr/bin/openvpn-ui
+    # OpenVPN UI configuration files.
+
+    python3_venv_path: /usr/bin/python3-venv
+    # Virtual environment for Python3. Just leave it as is.
+
+    ovpn_port: '8389'
+    ovpn_ui_port: '8089'
+    # OpenVPN and OpenVPN UI ports.
+
+    ovpn_trust_subnet: 10.0.70/24 
+    # Trusted subnet, from which OpenVPN server will assign IPs to trusted 
+    # clients (default subnet for all clients) 
+
+    ovpn_guest_subnet: 10.0.71/24
+    # Guests subnet for clients with internet access only
+
+    ovpn_home_subnet: 192.168.88/24
+    # Subnet where the VPN server is located, thru which you get internet 
+    # access to the clients with MASQUERADE
+
+  # ============================================================================
+
+  hosts: "{{ host_group }}"
+  tasks:
+
+    - name: Update system
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Ensure Docker is installed
+      become: yes
+      apt:
+        name: docker.io
+        state: present
+        
+    - name: Start Docker
+      become: yes
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ensure python3 is installed
+      become: yes
+      apt:
+        name: python3
+        state: present
+
+    - name: Ensure pip3 is installed
+      become: yes
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Create a virtual environment and install Docker Python library
+      become: yes
+      block:
+        - name: Ensure python3-venv is installed
+          apt:
+            name: python3-venv
+            state: present
+    
+        - name: Create a virtual environment
+          command: python3 -m venv {{ python3_venv_path }}
+          args:
+            creates: "{{ python3_venv_path }}"
+    
+        - name: Install Docker Python library in the virtual environment
+          command: "{{ python3_venv_path }}/bin/pip install docker"
+
+    - name: Ensure OpenVPN directory exists
+      become: yes
+      file:
+        path: "{{ ovp_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Ensure OpenVPN UI directory exists
+      become: yes
+      file:
+        path: "{{ ovp_ui_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Install openvpn
+      command: docker pull d3vilh/openvpn-server:latest
+
+    - name: Deploy openvpn
+      become: yes
+      vars:
+        ansible_python_interpreter:"{{ python3_venv_path }}/bin/python3"
+      docker_container:
+        name: openvpn
+        image: d3vilh/openvpn-server:latest
+        privileged: true
+        ports: 
+          - "{{ ovp_port }}:1194/udp"
+        env:
+          TRUST_SUB: 10.0.70/24
+          GUEST_SUB: 10.0.71/24
+          HOME_SUB: 192.168.88/24
+        volumes:
+          - /usr/bin/openvpn/pki:/etc/openvpn/pki
+          - /usr/bin/openvpn/clients:/etc/openvpn/clients
+          - /usr/bin/openvpn/config:/etc/openvpn/config
+          - /usr/bin/openvpn/staticclients:/etc/openvpn/staticclients
+          - /usr/bin/openvpn/log:/var/log/openvpn
+          - /usr/bin/openvpn/fw-rules.sh:/opt/app/fw-rules.sh
+          - /usr/bin/openvpn/server.conf:/etc/openvpn/server.conf
+        capabilities:
+          - NET_ADMIN
+        restart: always
+
+    - name: Install openvpn-ui
+      command: docker pull d3vilh/openvpn-ui:latest
+
+    - name: Deploy openvpn-ui
+      become: yes
+      vars:
+        ansible_python_interpreter:"{{ python3_venv_path }}/bin/python3"
+      docker_container:
+        name: openvpn-ui
+        image: d3vilh/openvpn-ui:latest
+        env:
+          OPENVPN_ADMIN_USERNAME: "{{ ovp_ui_username }}"
+          OPENVPN_ADMIN_PASSWORD: "{{ ovp_ui_password }}"
+        privileged: true
+        ports:
+          - "{{ ovp_ui_port }}:8080/tcp"
+        volumes:
+          - /usr/bin/openvpn-ui/:/etc/openvpn
+          - /usr/bin/openvpn-ui/db:/opt/openvpn-ui/db
+          - /usr/bin/openvpn-ui/pki:/usr/share/easy-rsa/pki
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        restart: always
+
+    - name: Clear apt cache
+      apt:
+        autoclean: yes
+
+    - name: Print data to access openvpn
+      debug:
+        msg: "To access openvpn, use the following data: IP: {{ ansible_host }}, Port: {{ ovp_port }}"
+
+    - name: Print data to access openvpn-ui
+      debug:
+        msg: "To access openvpn-ui, use the following data: http://{{ ansible_host }}:{{ ovp_ui_port }} with username: {{ ovp_ui_username }}"

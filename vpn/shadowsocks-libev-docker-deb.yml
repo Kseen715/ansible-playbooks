@@ -1,6 +1,6 @@
-## Ansible playbook to installshadowsocks-libev on a Debian-based system
+## Ansible playbook to install shadowsocks-libev on a Debian-based system
 
-- name: Install WireGuard+GUI // shadowsocks-libev
+- name: Install shadowsocks-libev
   become: yes
   
   # ============================================================================
@@ -32,6 +32,11 @@
 
   hosts: "{{ host_group }}"
   tasks:
+
+    - name: Update system
+      apt:
+        update_cache: yes
+        upgrade: dist
 
     - name: Ensure Docker is installed
       become: yes
@@ -80,7 +85,7 @@
     - name: Deploy shadowsocks
       become: yes
       vars:
-        ansible_python_interpreter: "/etc/wireguard/venv/bin/python3"
+        ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
       docker_container:
         name: shadowsocks
         image: shadowsocks/shadowsocks-libev
@@ -94,6 +99,10 @@
         restart_policy: always
         container_default_behavior: no_defaults
 
+    - name: Clear apt cache
+      apt:
+        autoclean: yes
+
     - name: Print data to access shadowsocks-libev
       debug:
-        msg: "To access shadowsocks, use the following data: IP: {{ ansible_host }}, Port: {{ ss_port }}, Password: {{ ss_password }}, Method: {{ ss_method }}"
+        msg: "To access shadowsocks, use the following data: IP: {{ ansible_host }}, Port: {{ ss_port }}, Method: {{ ss_method }}"
