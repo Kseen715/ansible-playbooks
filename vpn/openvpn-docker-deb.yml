@@ -13,12 +13,6 @@
     ovpn_ui_password: PASSWORD_HERE
     # Will be used to access the openvpn-ui.
 
-    ovpn_path: /usr/bin/openvpn
-    # OpenVPN configuration files.
-
-    ovpn_ui_path: /usr/bin/openvpn-ui
-    # OpenVPN UI configuration files.
-
     python3_venv_path: /usr/bin/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
@@ -88,20 +82,6 @@
         - name: Install Docker Python library in the virtual environment
           command: "{{ python3_venv_path }}/bin/pip install docker"
 
-    - name: Ensure OpenVPN directory exists
-      become: yes
-      file:
-        path: "{{ ovpn_path }}"
-        state: directory
-        mode: '0755'
-
-    - name: Ensure OpenVPN UI directory exists
-      become: yes
-      file:
-        path: "{{ ovpn_ui_path }}"
-        state: directory
-        mode: '0755'
-
     - name: Ensure /etc/openvpn/config directory exists
       become: yes
       file:
@@ -145,10 +125,10 @@
         ports:
           - "{{ ovpn_ui_port }}:8080/tcp"
         volumes:
-           - "./:{{ ovpn_path }}"
-           - "./db:{{ ovpn_ui_path }}/db"
-           - "./pki:/usr/share/easy-rsa/pki"
-           - "/var/run/docker.sock:/var/run/docker.sock:ro"
+           - ./:/etc/openvpn
+           - ./db:/opt/openvpn-ui/db
+           - ./pki:/usr/share/easy-rsa/pki
+           - /var/run/docker.sock:/var/run/docker.sock:ro
         restart_policy: always
         container_default_behavior: no_defaults
 
@@ -170,14 +150,14 @@
           GUEST_SUB: '{{ ovpn_guest_subnet }}'
           HOME_SUB: '{{ ovpn_home_subnet }}'
         volumes:
-           - "./pki:{{ ovpn_path }}/pki"
-           - "./clients:{{ ovpn_path }}/clients"
-           - "./config:{{ ovpn_path }}/config"
-           - "./staticclients:{{ ovpn_path }}/staticclients"
-           - "./log:/var/log/openvpn"
-           - "./fw-rules.sh:/opt/app/fw-rules.sh"
-           - "./checkpsw.sh:/opt/app/checkpsw.sh"
-           - "./server.conf:{{ ovpn_path }}/server.conf"
+           - ./pki:/etc/openvpn/pki
+           - ./clients:/etc/openvpn/clients
+           - ./config:/etc/openvpn/config
+           - ./staticclients:/etc/openvpn/staticclients
+           - ./log:/var/log/openvpn
+           - ./fw-rules.sh:/opt/app/fw-rules.sh
+           - ./checkpsw.sh:/opt/app/checkpsw.sh
+           - ./server.conf:/etc/openvpn/server.conf
         capabilities:
           - NET_ADMIN
         restart_policy: always
