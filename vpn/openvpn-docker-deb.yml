@@ -155,8 +155,6 @@
           - NET_ADMIN
         restart_policy: always
         container_default_behavior: no_defaults
-        depends_on:
-          - "openvpn-ui"
 
     - name: Clear apt cache
       apt:
