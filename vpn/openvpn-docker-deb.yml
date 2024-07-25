@@ -148,7 +148,7 @@
            - "./clients:{{ ovpn_path }}/clients"
            - "./config:{{ ovpn_path }}/config"
            - "./staticclients:{{ ovpn_path }}/staticclients"
-           - "./log:var/log/openvpn"
+           - "./log:/var/log/openvpn"
            - "./fw-rules.sh:/opt/app/fw-rules.sh"
            - "./checkpsw.sh:/opt/app/checkpsw.sh"
            - "./server.conf:{{ ovpn_path }}/server.conf"
