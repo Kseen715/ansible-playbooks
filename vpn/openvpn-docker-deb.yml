@@ -102,6 +102,25 @@
         state: directory
         mode: '0755'
 
+    - name: Ensure /etc/openvpn/config/easy-rsa.vars exists
+      become: yes
+      copy:
+        content: |
+          set_var EASYRSA_DN           "com"
+          set_var EASYRSA_REQ_COUNTRY  "_"
+          set_var EASYRSA_REQ_PROVINCE "_"
+          set_var EASYRSA_REQ_CITY     "_"
+          set_var EASYRSA_REQ_ORG      "_"
+          set_var EASYRSA_REQ_EMAIL    "mail@example.com"
+          set_var EASYRSA_REQ_OU       "_"
+          set_var EASYRSA_REQ_CN       "OpenVPNServer"
+          set_var EASYRSA_KEY_SIZE     2048
+          set_var EASYRSA_CA_EXPIRE    3650
+          set_var EASYRSA_CERT_EXPIRE  825
+          set_var EASYRSA_CERT_RENEW   30
+          set_var EASYRSA_CRL_DAYS     180
+        dest: "{{ ovpn_path }}/config/easy-rsa.vars"
+
     - name: Install openvpn-ui
       command: docker pull d3vilh/openvpn-ui:latest
 
@@ -121,7 +140,7 @@
         volumes:
            - "./:{{ ovpn_path }}"
            - "./db:{{ ovpn_ui_path }}/db"
-           - "./pki:{{ ovpn_ui_path }}/easy-rsa/pki"
+           - "./pki:/usr/share/easy-rsa/pki"
            - "/var/run/docker.sock:/var/run/docker.sock:ro"
         restart_policy: always
         container_default_behavior: no_defaults
