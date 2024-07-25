@@ -102,6 +102,13 @@
         state: directory
         mode: '0755'
 
+    - name: Ensure /etc/openvpn/config directory exists
+      become: yes
+      file:
+        path: "/etc/openvpn/config"
+        state: directory
+        mode: '0755'
+
     - name: Ensure /etc/openvpn/config/easy-rsa.vars exists
       become: yes
       copy:
