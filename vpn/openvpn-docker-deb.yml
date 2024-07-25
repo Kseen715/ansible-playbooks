@@ -158,6 +158,7 @@
            - ./fw-rules.sh:/opt/app/fw-rules.sh
            - ./checkpsw.sh:/opt/app/checkpsw.sh
            - ./server.conf:/etc/openvpn/server.conf
+           - /etc/openvpn/config:/etc/openvpn/config
         capabilities:
           - NET_ADMIN
         restart_policy: always
