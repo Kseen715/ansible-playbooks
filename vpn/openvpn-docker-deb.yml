@@ -82,8 +82,13 @@
         - name: Install Docker Python library in the virtual environment
           command: "{{ python3_venv_path }}/bin/pip install docker"
 
-    - name: Install openvpn
-      command: docker pull openvpn-latest
+    - name: Clone openvpn repo
+      git:
+        repo: https://github.com/flant/ovpn-admin.git
+        dest: /tmp/ovpn-admin
+
+    - name: Build openvpn image
+      command: docker build -t openvpn-latest /tmp/ovpn-admin/ -f /tmp/ovpn-admin/Dockerfile.openvpn
 
     - name: Deploy openvpn
       become: yes
@@ -110,7 +115,7 @@
         container_default_behavior: no_defaults
 
     - name: Install openvpn-ui
-      command: docker pull ovpn-admin:latest
+      command: docker pull flant/ovpn-admin:latest
 
     - name: Deploy openvpn-ui
       become: yes
@@ -118,7 +123,7 @@
         ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
       docker_container:
         name: openvpn-ui
-        image: ovpn-admin:latest
+        image: flant/ovpn-admin:latest
         env:
           OVPN_DEBUG: "true"
           OVPN_VERBOSE: "true"
