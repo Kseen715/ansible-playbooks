@@ -16,7 +16,7 @@
     python3_venv_path: /usr/bin/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
-    ovpn_port: '1194' # DO NOT CHANGE
+    ovpn_port: '1194'
     ovpn_ui_port: '8089'
     # OpenVPN and OpenVPN UI ports.
 
@@ -82,31 +82,30 @@
         - name: Install Docker Python library in the virtual environment
           command: "{{ python3_venv_path }}/bin/pip install docker"
 
-    - name: Ensure /etc/openvpn/config directory exists
-      become: yes
-      file:
-        path: "/etc/openvpn/config"
-        state: directory
-        mode: '0755'
+    - name: Install openvpn
+      command: docker pull d3vilh/openvpn-server:latest
 
-    - name: Ensure /etc/openvpn/config/easy-rsa.vars exists
+    - name: Deploy openvpn
       become: yes
-      copy:
-        content: |
-          set_var EASYRSA_DN           "com"
-          set_var EASYRSA_REQ_COUNTRY  "_"
-          set_var EASYRSA_REQ_PROVINCE "_"
-          set_var EASYRSA_REQ_CITY     "_"
-          set_var EASYRSA_REQ_ORG      "_"
-          set_var EASYRSA_REQ_EMAIL    "mail@example.com"
-          set_var EASYRSA_REQ_OU       "_"
-          set_var EASYRSA_REQ_CN       "OpenVPNServer"
-          set_var EASYRSA_KEY_SIZE     2048
-          set_var EASYRSA_CA_EXPIRE    3650
-          set_var EASYRSA_CERT_EXPIRE  825
-          set_var EASYRSA_CERT_RENEW   30
-          set_var EASYRSA_CRL_DAYS     180
-        dest: "/etc/openvpn/config/easy-rsa.vars"
+      vars:
+        ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
+      docker_container:
+        name: openvpn
+        image: awalach/openvpn
+        privileged: true
+        ports: 
+          - "{{ ovpn_port }}:1194/udp"
+        env:
+          TRUST_SUB: '{{ ovpn_trust_subnet }}'
+          GUEST_SUB: '{{ ovpn_guest_subnet }}'
+          HOME_SUB: '{{ ovpn_home_subnet }}'
+        volumes:
+           - ./openvpn-data/openvpn:/etc/openvpn
+        capabilities:
+          - NET_ADMIN
+          - SYS_PTRACE
+        restart_policy: always
+        container_default_behavior: no_defaults
 
     - name: Install openvpn-ui
       command: docker pull d3vilh/openvpn-ui:latest
@@ -117,50 +116,25 @@
         ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
       docker_container:
         name: openvpn-ui
-        image: d3vilh/openvpn-ui:latest
+        image: vuonglequoc/openvpn-web-ui
         env:
           OPENVPN_ADMIN_USERNAME: "{{ ovpn_ui_username }}"
           OPENVPN_ADMIN_PASSWORD: "{{ ovpn_ui_password }}"
+          SERVER_NAME: Server
+          SERVER_EMAIL: mail@example.com
+          SERVER_COUNTRY: "-"
+          SERVER_PROVINCE: "-"
+          SERVER_CITY: "-"
+          SERVER_ORG: "-"
+          SERVER_OU: "Community"
+          SERVER_CN: "Server"
         privileged: true
         ports:
           - "{{ ovpn_ui_port }}:8080/tcp"
         volumes:
-           - ./:/etc/openvpn
-           - ./db:/opt/openvpn-ui/db
-           - ./pki:/usr/share/easy-rsa/pki
-           - /var/run/docker.sock:/var/run/docker.sock:ro
-        restart_policy: always
-        container_default_behavior: no_defaults
-
-    - name: Install openvpn
-      command: docker pull d3vilh/openvpn-server:latest
-
-    - name: Deploy openvpn
-      become: yes
-      vars:
-        ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
-      docker_container:
-        name: openvpn
-        image: d3vilh/openvpn-server:latest
-        privileged: true
-        ports: 
-          - "{{ ovpn_port }}:1194/udp"
-        env:
-          TRUST_SUB: '{{ ovpn_trust_subnet }}'
-          GUEST_SUB: '{{ ovpn_guest_subnet }}'
-          HOME_SUB: '{{ ovpn_home_subnet }}'
-        volumes:
-           - ./pki:/etc/openvpn/pki
-           - ./clients:/etc/openvpn/clients
-           - ./config:/etc/openvpn/config
-           - ./staticclients:/etc/openvpn/staticclients
-           - ./log:/var/log/openvpn
-           - ./fw-rules.sh:/opt/app/fw-rules.sh
-           - ./checkpsw.sh:/opt/app/checkpsw.sh
-           - ./server.conf:/etc/openvpn/server.conf
-           - /etc/openvpn/config:/etc/openvpn/config
-        capabilities:
-          - NET_ADMIN
+          - ./openvpn-data/openvpn:/etc/openvpn
+          - ./openvpn-data/ca_server:/etc/ca_server
+          - ./openvpn-data/db:/opt/openvpn-gui/db
         restart_policy: always
         container_default_behavior: no_defaults
 
