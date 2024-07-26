@@ -83,7 +83,7 @@
           command: "{{ python3_venv_path }}/bin/pip install docker"
 
     - name: Install openvpn
-      command: docker pull d3vilh/openvpn-server:latest
+      command: docker pull openvpn-latest
 
     - name: Deploy openvpn
       become: yes
@@ -91,16 +91,18 @@
         ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
       docker_container:
         name: openvpn
-        image: awalach/openvpn
+        image: openvpn-latest
         privileged: true
         ports: 
-          - "{{ ovpn_port }}:1194/udp"
+          - "{{ ovpn_port }}:1194" # for openvpn
+          - "8080:8080" # for ovpn-admin because of network_mode
         env:
-          TRUST_SUB: '{{ ovpn_trust_subnet }}'
-          GUEST_SUB: '{{ ovpn_guest_subnet }}'
-          HOME_SUB: '{{ ovpn_home_subnet }}'
+          OVPN_SERVER_NET: "192.168.100.0"
+          OVPN_SERVER_MASK: "255.255.255.0"
+          OVPN_PASSWD_AUTH: "true"
         volumes:
-           - ./openvpn-data/openvpn:/etc/openvpn
+          - ./easyrsa_master:/etc/openvpn/easyrsa
+          - ./ccd_master:/etc/openvpn/ccd
         capabilities:
           - NET_ADMIN
           - SYS_PTRACE
@@ -108,7 +110,7 @@
         container_default_behavior: no_defaults
 
     - name: Install openvpn-ui
-      command: docker pull d3vilh/openvpn-ui:latest
+      command: docker pull ovpn-admin:latest
 
     - name: Deploy openvpn-ui
       become: yes
@@ -116,27 +118,28 @@
         ansible_python_interpreter: "{{ python3_venv_path }}/bin/python3"
       docker_container:
         name: openvpn-ui
-        image: vuonglequoc/openvpn-web-ui
+        image: ovpn-admin:latest
         env:
-          OPENVPN_ADMIN_USERNAME: "{{ ovpn_ui_username }}"
-          OPENVPN_ADMIN_PASSWORD: "{{ ovpn_ui_password }}"
-          SERVER_NAME: Server
-          SERVER_EMAIL: mail@example.com
-          SERVER_COUNTRY: "-"
-          SERVER_PROVINCE: "-"
-          SERVER_CITY: "-"
-          SERVER_ORG: "-"
-          SERVER_OU: "Community"
-          SERVER_CN: "Server"
+          OVPN_DEBUG: "true"
+          OVPN_VERBOSE: "true"
+          OVPN_NETWORK: "192.168.100.0/24"
+          OVPN_CCD: "true"
+          OVPN_CCD_PATH: "/mnt/ccd"
+          EASYRSA_PATH: "/mnt/easyrsa"
+          OVPN_SERVER: "127.0.0.1:{{ ovpn_port }}:tcp"
+          OVPN_INDEX_PATH: "/mnt/easyrsa/pki/index.txt"
+          OVPN_AUTH: "true"
+          OVPN_AUTH_DB_PATH: "/mnt/easyrsa/pki/users.db"
+          LOG_LEVEL: "debug"
         privileged: true
         ports:
           - "{{ ovpn_ui_port }}:8080/tcp"
         volumes:
-          - ./openvpn-data/openvpn:/etc/openvpn
-          - ./openvpn-data/ca_server:/etc/ca_server
-          - ./openvpn-data/db:/opt/openvpn-gui/db
+          - ./easyrsa_master:/mnt/easyrsa
+          - ./ccd_master:/mnt/ccd
         restart_policy: always
         container_default_behavior: no_defaults
+        network_mode: "service:openvpn"
 
     - name: Clear apt cache
       apt:
