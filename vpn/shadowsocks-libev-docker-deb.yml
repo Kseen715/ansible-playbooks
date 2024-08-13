@@ -24,7 +24,7 @@
     # salsa20, chacha20 and chacha20-ietf.
     # The default cipher is chacha20-ietf-poly1305.
 
-    python3_venv_path: /usr/bin/python3-venv
+    python3_venv_path: /tmp/Kseen715/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
     ss_port: '8388'

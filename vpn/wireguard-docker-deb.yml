@@ -15,7 +15,7 @@
     wg_path: /usr/bin/wireguard
     # WireGuard configuration files.
 
-    python3_venv_path: /usr/bin/python3-venv
+    python3_venv_path: /tmp/Kseen715/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
     wg_port: '51820'
