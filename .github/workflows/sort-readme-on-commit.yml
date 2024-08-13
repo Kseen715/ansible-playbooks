@@ -1,24 +1,42 @@
 # run runall.py on commit and commit result to the repo
-name: Sort README.md's On Commit
+name: CI
+
 on:
   - push
   - pull_request
 
 jobs:
-    run:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: "Set up Python"
-          uses: actions/setup-python@v2
-          with:
-            python-version: '3.x'
-        - name: "Sort README.md's"
-          run: python ./lone_sort_readme.py
-        - name: "Commit results"
-          run: |
-            git config --global user.email ""
-            git config --global user.name "GitHub Actions"
-            git add .
-            git commit -m "Sort README.md's" || echo "Nothing to commit"
-            git push || echo "Nothing to push"
+  spellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install codespell
+        shell: bash
+        run: |
+          sudo apt-get update || true
+          sudo apt-get install -y codespell
+
+      - name: Run Spellchecker
+        run: codespell
+
+  sort-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Set up Python"
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: "Sort README.md's"
+        run: python ./lone_sort_readme.py
+        
+      - name: "Commit results"
+        run: |
+          git config --global user.email ""
+          git config --global user.name "GitHub Actions"
+          git add .
+          git commit -m "Sort README.md's" || echo "Nothing to commit"
+          git push || echo "Nothing to push"
