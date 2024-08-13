@@ -250,6 +250,7 @@ def sort_readme(file_path: str):
             Logger.warning(f'{file_path} has been modified')
         else:
             Logger.info(f'{file_path} has not been modified')
+            Logger.info('sort_readme: Finished')
             return
     else:
         Logger.warning(f'No hash file found for {file_path}. '\
