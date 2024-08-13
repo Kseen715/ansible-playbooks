@@ -1,9 +1,9 @@
 # run runall.py on commit and commit result to the repo
 name: Sort README.md's On Commit
 on:
-  push:
-    branches:
-      - main
+  - push
+  - pull_request
+
 jobs:
     run:
         runs-on: ubuntu-latest
