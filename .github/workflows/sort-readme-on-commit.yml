@@ -20,5 +20,5 @@ jobs:
             git config --global user.email ""
             git config --global user.name "GitHub Actions"
             git add .
-            git commit -m "Auto fracture run" || echo "Nothing to commit"
+            git commit -m "Sort README.md's" || echo "Nothing to commit"
             git push || echo "Nothing to push"
