@@ -7,4 +7,7 @@
 Collection of my Ansible playbooks.
 
 ## Contains
+<div id="auto-sort-start"/>
+
 - [VPNs](https://github.com/Kseen715/ansible-playbooks/tree/main/vpn)
+<div id="auto-sort-end"/>

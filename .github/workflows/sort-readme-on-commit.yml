@@ -1,5 +1,5 @@
 # run runall.py on commit and commit result to the repo
-name: On Commit
+name: Sort README.md's On Commit
 on:
   push:
     branches:
@@ -13,11 +13,7 @@ jobs:
           uses: actions/setup-python@v2
           with:
             python-version: '3.x'
-        - name: "Install dependencies"
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-        - name: "Run all"
+        - name: "Sort README.md's"
           run: python ./lone_sort_readme.py
         - name: "Commit results"
           run: |
