@@ -247,15 +247,15 @@ def convert_file_name_to_hash_name(file_path: str):
     # Append .hash extension
     hash_name += '.hash'
     #  Join hashes folder
-    hash_name = os.path.join('hashes', hash_name)
+    hash_name = os.path.join('.hashes', hash_name)
     return hash_name
 
 
 def sort_readme(file_path: str):
     Logger.info('sort_readme: Starting')
     hashfile_path = convert_file_name_to_hash_name(file_path)
-    if not os.path.exists('hashes'):
-        os.makedirs('hashes')
+    if not os.path.exists('.hashes'):
+        os.makedirs('.hashes')
     if os.path.exists(hashfile_path):
         if not check_hash_binary(hash_file(file_path), hashfile_path):
             Logger.warning(f'{file_path} has been modified')
