@@ -1,0 +1,101 @@
+## Ansible playbook to install 3x-ui on a linux-based system
+
+- name: Install 3x-ui
+  become: yes
+
+  # ============================================================================
+  vars:
+    host_group: "{{ lookup('env', 'HOST_GROUP') }}"
+    # Your 'hosts', can be a group or a single host, e.g. 'localhost' if
+    # you want to run the playbook on the local machine.
+
+    # hostname: $HOSTNAME
+    # For the container hostname.
+
+    # <basepath>/x-ui
+    installation_path: "{{ lookup('env', 'INSTALLATION_BASEPATH') | default('/opt/vpn') }}/3x-ui"
+
+    ansible_python3_path: /tmp/Kseen715/python3-venv
+    # Virtual environment for Python3. Just leave it as is.
+  # ============================================================================
+
+  hosts: "{{ host_group }}"
+  tasks:
+    - name: Update system
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Ensure Docker is installed
+      become: yes
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker
+      become: yes
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ensure installation path directory exists
+      become: yes
+      file:
+        path: "{{ installation_path }}"
+        state: directory
+        mode: "0755"
+
+    - name: Ensure python3 is installed
+      become: yes
+      apt:
+        name: python3
+        state: present
+
+    - name: Ensure pip3 is installed
+      become: yes
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Create a virtual environment and install Docker Python library
+      become: yes
+      block:
+        - name: Ensure python3-venv is installed
+          apt:
+            name: python3-venv
+            state: present
+
+        - name: Create a virtual environment
+          command: python3 -m venv {{ ansible_python3_path }}
+          args:
+            creates: "{{ ansible_python3_path }}"
+
+        - name: Install Docker Python library in the virtual environment
+          command: "{{ ansible_python3_path }}/bin/pip install docker"
+
+    - name: Deploy 3x-ui
+      become: yes
+      vars:
+        ansible_python_interpreter: "{{ ansible_python3_path }}/bin/python3"
+      docker_container:
+        name: 3x-ui
+        image: ghcr.io/mhsanaei/3x-ui:latest
+        # hostname: yourhostname
+        volumes:
+          - "/etc/x-ui:{{ installation_path }}"
+          - "/root/cert:/root/cert"
+        env:
+          XRAY_VMESS_AEAD_FORCED: "false"
+        tty: true
+        network_mode: host
+        restart_policy: unless-stopped
+        container_default_behavior: no_defaults
+
+    - name: Clear apt cache
+      apt:
+        autoclean: yes
+
+    - name: Print URL to access 3x-ui
+      debug:
+        msg: "Access the 3x-ui at http://{{ ansible_default_ipv4.address }}:2053 with admin:admin. After login IMMEDIATELY change login, password and URI path!"
