@@ -18,13 +18,12 @@
     python3_venv_path: /tmp/Kseen715/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
-    wg_port: '51820'
-    wg_gui_port: '51821'
+    wg_port: "51820"
+    wg_gui_port: "51821"
   # ============================================================================
-  
+
   hosts: "{{ host_group }}"
   tasks:
-
     - name: Update system
       apt:
         update_cache: yes
@@ -35,7 +34,7 @@
       apt:
         name: docker.io
         state: present
-        
+
     - name: Start Docker
       become: yes
       service:
@@ -48,7 +47,7 @@
       file:
         path: "{{ wg_path }}"
         state: directory
-        mode: '0755'
+        mode: "0755"
 
     - name: Ensure python3 is installed
       become: yes
@@ -69,12 +68,12 @@
           apt:
             name: python3-venv
             state: present
-    
+
         - name: Create a virtual environment
           command: python3 -m venv {{ python3_venv_path }}
           args:
             creates: "{{ python3_venv_path }}"
-    
+
         - name: Install Docker Python library in the virtual environment
           command: "{{ python3_venv_path }}/bin/pip install docker"
 

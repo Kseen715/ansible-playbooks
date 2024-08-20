@@ -2,7 +2,7 @@
 
 - name: Install shadowsocks-libev
   become: yes
-  
+
   # ============================================================================
   vars:
     host_group: localhost
@@ -16,26 +16,25 @@
     python3_venv_path: /usr/bin/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
-    ovpn_port: '1194'
-    ovpn_ui_port: '8089'
+    ovpn_port: "1194"
+    ovpn_ui_port: "8089"
     # OpenVPN and OpenVPN UI ports.
 
-    ovpn_trust_subnet: '10.0.70/24'
-    # Trusted subnet, from which OpenVPN server will assign IPs to trusted 
-    # clients (default subnet for all clients) 
+    ovpn_trust_subnet: "10.0.70/24"
+    # Trusted subnet, from which OpenVPN server will assign IPs to trusted
+    # clients (default subnet for all clients)
 
-    ovpn_guest_subnet: '10.0.71/24'
+    ovpn_guest_subnet: "10.0.71/24"
     # Guests subnet for clients with internet access only
 
-    ovpn_home_subnet: '192.168.88/24'
-    # Subnet where the VPN server is located, thru which you get internet 
+    ovpn_home_subnet: "192.168.88/24"
+    # Subnet where the VPN server is located, thru which you get internet
     # access to the clients with MASQUERADE
 
   # ============================================================================
 
   hosts: "{{ host_group }}"
   tasks:
-
     - name: Update system
       apt:
         update_cache: yes
@@ -46,7 +45,7 @@
       apt:
         name: docker.io
         state: present
-        
+
     - name: Start Docker
       become: yes
       service:
@@ -73,12 +72,12 @@
           apt:
             name: python3-venv
             state: present
-    
+
         - name: Create a virtual environment
           command: python3 -m venv {{ python3_venv_path }}
           args:
             creates: "{{ python3_venv_path }}"
-    
+
         - name: Install Docker Python library in the virtual environment
           command: "{{ python3_venv_path }}/bin/pip install docker"
 
@@ -98,7 +97,7 @@
         name: openvpn
         image: openvpn-latest
         privileged: true
-        ports: 
+        ports:
           - "{{ ovpn_port }}:1194" # for openvpn
           - "8080:8080" # for ovpn-admin because of network_mode
         env:

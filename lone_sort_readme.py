@@ -1,17 +1,20 @@
 # Catches <div id="auto-sort-start"/> and <div id="auto-sort-end"/> in
-# all README.md files in current folder and subfolders. Then sorts the lines 
+# all README.md files in current folder and subfolders. Then sorts the lines
 # between them alphabetically.
 #
-# 
-# 
+#
+#
 # The script also creates a hash file for each README.md file to keep track of
 # changes. If the hash file is missing or the hash does not match, the script
 # will warn the user that the file has been modified.
-# 
+#
 # v1.2.0
 
 
-import re, os, datetime, hashlib
+import re
+import os
+import datetime
+import hashlib
 
 
 # To drop the following imports and whole requirements.txt file:
@@ -48,59 +51,65 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-# 
-# 
+#
+#
 CSI = '\033['
-# 
-# 
+#
+#
+
+
 def code_to_chars(code):
     return CSI + str(code) + 'm'
-# 
-# 
+#
+#
+
+
 class colorama:
     class AnsiCodes(object):
         def __init__(self):
             # the subclasses declare class attributes which are numbers.
-            # Upon instantiation we define instance attributes, which are the 
-            # same as the class attributes but wrapped with the ANSI escape 
+            # Upon instantiation we define instance attributes, which are the
+            # same as the class attributes but wrapped with the ANSI escape
             # sequence
             for name in dir(self):
                 if not name.startswith('_'):
                     value = getattr(self, name)
                     setattr(self, name, code_to_chars(value))
-    # 
-    # 
+    #
+    #
+
     class AnsiFore(AnsiCodes):
-        BLACK           = 30
-        RED             = 31
-        GREEN           = 32
-        YELLOW          = 33
-        BLUE            = 34
-        MAGENTA         = 35
-        CYAN            = 36
-        WHITE           = 37
-        RESET           = 39
-    # 
+        BLACK = 30
+        RED = 31
+        GREEN = 32
+        YELLOW = 33
+        BLUE = 34
+        MAGENTA = 35
+        CYAN = 36
+        WHITE = 37
+        RESET = 39
+    #
         # These are fairly well supported, but not part of the standard.
-        LIGHTBLACK_EX   = 90
-        LIGHTRED_EX     = 91
-        LIGHTGREEN_EX   = 92
-        LIGHTYELLOW_EX  = 93
-        LIGHTBLUE_EX    = 94
+        LIGHTBLACK_EX = 90
+        LIGHTRED_EX = 91
+        LIGHTGREEN_EX = 92
+        LIGHTYELLOW_EX = 93
+        LIGHTBLUE_EX = 94
         LIGHTMAGENTA_EX = 95
-        LIGHTCYAN_EX    = 96
-        LIGHTWHITE_EX   = 97
-    # 
-    # 
+        LIGHTCYAN_EX = 96
+        LIGHTWHITE_EX = 97
+    #
+    #
+
     class AnsiStyle(AnsiCodes):
-        BRIGHT    = 1
-        DIM       = 2
-        NORMAL    = 22
+        BRIGHT = 1
+        DIM = 2
+        NORMAL = 22
         RESET_ALL = 0
-    # 
-    # 
-    Fore   = AnsiFore()
-    Style  = AnsiStyle()
+    #
+    #
+    Fore = AnsiFore()
+    Style = AnsiStyle()
 # ==============================================================================
 # End of colorama.py module
 # ==============================================================================
@@ -126,7 +135,7 @@ class Logger:
             msg (str): Debug message
         """
         if Logger.LOG_LEVEL >= Logger.LOG_LEVELS['DEBUG']:
-            print(f'{colorama.Fore.CYAN}{datetime.datetime.now()} ' \
+            print(f'{colorama.Fore.CYAN}{datetime.datetime.now()} '
                   + f'[DEBUG] {msg}{colorama.Style.RESET_ALL}')
 
     @staticmethod
@@ -137,7 +146,7 @@ class Logger:
             msg (str): Info message
         """
         if Logger.LOG_LEVEL >= Logger.LOG_LEVELS['INFO']:
-            print(f'{colorama.Style.RESET_ALL}{datetime.datetime.now()} ' \
+            print(f'{colorama.Style.RESET_ALL}{datetime.datetime.now()} '
                   + f'[INFO] {msg}{colorama.Style.RESET_ALL}')
 
     @staticmethod
@@ -148,7 +157,7 @@ class Logger:
             msg (str): Happy message
         """
         if Logger.LOG_LEVEL >= Logger.LOG_LEVELS['SUCCESS']:
-            print(f'{colorama.Fore.GREEN}{datetime.datetime.now()} ' \
+            print(f'{colorama.Fore.GREEN}{datetime.datetime.now()} '
                   + f'[SUCCESS] {msg}{colorama.Style.RESET_ALL}')
 
     @staticmethod
@@ -159,7 +168,7 @@ class Logger:
             msg (str): Warning message
         """
         if Logger.LOG_LEVEL >= Logger.LOG_LEVELS['WARNING']:
-            print(f'{colorama.Fore.YELLOW}{datetime.datetime.now()} ' \
+            print(f'{colorama.Fore.YELLOW}{datetime.datetime.now()} '
                   + f'[WARNING] {msg}{colorama.Style.RESET_ALL}')
 
     @staticmethod
@@ -170,7 +179,7 @@ class Logger:
             msg (str): Error message
         """
         if Logger.LOG_LEVEL >= Logger.LOG_LEVELS['ERROR']:
-            print(f'{colorama.Fore.RED}{datetime.datetime.now()} ' \
+            print(f'{colorama.Fore.RED}{datetime.datetime.now()} '
                   + f'[ERROR] {msg}{colorama.Style.RESET_ALL}')
 
 
@@ -255,12 +264,12 @@ def sort_readme(file_path: str):
             Logger.info('sort_readme: Finished')
             return
     else:
-        Logger.warning(f'No hash file found for {file_path}. '\
+        Logger.warning(f'No hash file found for {file_path}. '
                        + 'New hash will be created')
-    
+
     with open(file_path, 'r') as f:
         readme = f.readlines()
-    
+
     def sort_block(lines):
         sorted_lines = []
         i = 0
@@ -283,31 +292,36 @@ def sort_readme(file_path: str):
                     # Sort entire nested blocks
                     blocks_to_sort = [lines[start:nested_blocks[0][0]]]
                     for j in range(len(nested_blocks)):
-                        blocks_to_sort.append(lines[nested_blocks[j][0]:nested_blocks[j][1]+1])
+                        blocks_to_sort.append(
+                            lines[nested_blocks[j][0]:nested_blocks[j][1]+1])
                         if j < len(nested_blocks) - 1:
-                            blocks_to_sort.append(lines[nested_blocks[j][1]+1:nested_blocks[j+1][0]])
+                            blocks_to_sort.append(
+                                lines[nested_blocks[j][1]+1:nested_blocks[j+1][0]])
                     blocks_to_sort.append(lines[nested_blocks[-1][1]+1:end])
-                    sorted_blocks = sorted(blocks_to_sort, key=lambda block: re.sub(r'[^a-zA-Z0-9\s+\-*/=%^()]', '', ''.join(block)))
+                    sorted_blocks = sorted(blocks_to_sort, key=lambda block: re.sub(
+                        r'[^a-zA-Z0-9\s+\-*/=%^()]', '', ''.join(block)))
                     for block in sorted_blocks:
                         sorted_lines.extend(block)
                 else:
                     # Sort lines within the block
                     lines_to_sort = lines[start:end]
-                    sorted_lines.extend(sorted(lines_to_sort, key=lambda line: re.sub(r'[^a-zA-Z0-9\s+\-*/=%^()]', '', line)))
+                    sorted_lines.extend(sorted(lines_to_sort, key=lambda line: re.sub(
+                        r'[^a-zA-Z0-9\s+\-*/=%^()]', '', line)))
                 sorted_lines.append(lines[end])
             else:
                 sorted_lines.append(lines[i])
             i += 1
         return sorted_lines
-    
+
     sorted_readme = sort_block(readme)
-    
+
     with open(file_path, 'w') as f:
         f.writelines(sorted_readme)
-    
+
     Logger.happy(f'Sorted {file_path}')
     save_hash_binary(hash_file(file_path), hashfile_path)
     Logger.info('sort_readme: Finished')
+
 
 def search_readmes():
     Logger.info('search_readmes: Starting')
@@ -323,4 +337,3 @@ def search_readmes():
 
 if __name__ == '__main__':
     [sort_readme(readme) for readme in search_readmes()]
-

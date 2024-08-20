@@ -3,69 +3,69 @@
 # use ID or ID_LIKE to determine the distribution
 
 - hosts: all
-  become: 'yes'
+  become: "yes"
   tasks:
     - name: Upgrade all packages (Debian)
       apt:
-        upgrade: 'yes'
-        update_cache: 'yes'
+        upgrade: "yes"
+        update_cache: "yes"
       when: ansible_os_family == 'Debian'
 
     - name: Upgrade all packages (RedHat)
       yum:
-        name: '*'
+        name: "*"
         state: latest
       when: ansible_os_family == 'RedHat'
 
     - name: Upgrade all packages (Fedora)
       dnf:
-        name: '*'
+        name: "*"
         state: latest
       when: ansible_os_family == 'Fedora'
 
     - name: Upgrade all packages (Archlinux)
       pacman:
-        upgrade: 'full'
+        upgrade: "full"
       when: ansible_os_family == 'Archlinux'
 
     - name: Upgrade all packages (Suse)
       zypper:
-        name: '*'
+        name: "*"
         state: latest
       when: ansible_os_family == 'Suse'
 
     - name: Upgrade all packages (Alpine)
       apk:
-        upgrade: 'yes'
+        upgrade: "yes"
       when: ansible_os_family == 'Alpine'
 
     - name: Upgrade all packages (Gentoo)
       portage:
-        upgrade: 'yes'
+        upgrade: "yes"
       when: ansible_os_family == 'Gentoo'
 
     - name: Upgrade all packages (Slackware)
       slackpkg:
-        state: 'upgrade'
+        state: "upgrade"
       when: ansible_os_family == 'Slackware'
 
     - name: Upgrade all packages (Void)
       xbps:
-        name: '*'
+        name: "*"
         state: latest
       when: ansible_os_family == 'Void'
 
     - name: Upgrade all packages (OpenBSD)
       openbsd_pkg:
-        state: 'latest'
+        state: "latest"
       when: ansible_os_family == 'OpenBSD'
 
     - name: Upgrade all packages (FreeBSD)
       freebsd_pkg:
-        state: 'latest'
+        state: "latest"
       when: ansible_os_family == 'FreeBSD'
 
     - name: Upgrade all packages (NetBSD)
       netbsd_pkgin:
-        state: 'latest'
+        state: "latest"
       when: ansible_os_family == 'NetBSD'

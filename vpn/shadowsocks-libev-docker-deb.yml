@@ -2,7 +2,7 @@
 
 - name: Install shadowsocks-libev
   become: yes
-  
+
   # ============================================================================
   vars:
     host_group: localhost
@@ -27,12 +27,11 @@
     python3_venv_path: /tmp/Kseen715/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
-    ss_port: '8388'
+    ss_port: "8388"
   # ============================================================================
 
   hosts: "{{ host_group }}"
   tasks:
-
     - name: Update system
       apt:
         update_cache: yes
@@ -43,7 +42,7 @@
       apt:
         name: docker.io
         state: present
-        
+
     - name: Start Docker
       become: yes
       service:
@@ -70,12 +69,12 @@
           apt:
             name: python3-venv
             state: present
-    
+
         - name: Create a virtual environment
           command: python3 -m venv {{ python3_venv_path }}
           args:
             creates: "{{ python3_venv_path }}"
-    
+
         - name: Install Docker Python library in the virtual environment
           command: "{{ python3_venv_path }}/bin/pip install docker"
 
