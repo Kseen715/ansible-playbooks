@@ -5,14 +5,14 @@
 
   # ============================================================================
   vars:
-    host_group: localhost
+    host_group: "{{ lookup('env', 'HOST_GROUP') }}"
     # Your 'hosts', can be a group or a single host, e.g. 'localhost' if
     # you want to run the playbook on the local machine.
 
-    ss_password: PASSWORD_HERE
+    ss_password: "{{ lookup('env', 'SHADOWSOCKS_PASSWORD') }}"
     # Will be used to connect to the shadowsocks server.
 
-    ss_method: aes-256-gcm
+    ss_method: "{{ lookup('env', 'SHADOWSOCKS_METHOD') }}"
     # Shadowsocks encrypt method: rc4-md5,
     # aes-128-gcm, aes-192-gcm, aes-256-gcm,
     # aes-128-cfb, aes-192-cfb, aes-256-cfb,
@@ -27,7 +27,7 @@
     python3_venv_path: /tmp/Kseen715/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
-    ss_port: "8388"
+    ss_port: "{{ lookup('env', 'SHADOWSOCKS_PORT') }}"
   # ============================================================================
 
   hosts: "{{ host_group }}"
@@ -50,26 +50,18 @@
         state: started
         enabled: yes
 
-    - name: Ensure python3 is installed
+    - name: Ensure python3 and pip3 are installed
       become: yes
       apt:
-        name: python3
-        state: present
-
-    - name: Ensure pip3 is installed
-      become: yes
-      apt:
-        name: python3-pip
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
         state: present
 
     - name: Create a virtual environment and install Docker Python library
       become: yes
       block:
-        - name: Ensure python3-venv is installed
-          apt:
-            name: python3-venv
-            state: present
-
         - name: Create a virtual environment
           command: python3 -m venv {{ python3_venv_path }}
           args:

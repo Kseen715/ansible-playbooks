@@ -5,21 +5,21 @@
 
   # ============================================================================
   vars:
-    host_group: localhost
+    host_group: "{{ lookup('env', 'HOST_GROUP') }}"
     # Your 'hosts', can be a group or a single host, e.g. 'localhost' if
     # you want to run the playbook on the local machine.
 
-    wg_gui_password: PASSWORD_HERE
+    wg_gui_password: "{{ lookup('env', 'WIREGUARD_WEB_GUI_PASSWORD') }}"
     # Will be used to access the WireGuard GUI.
 
-    wg_path: /usr/bin/wireguard
+    wg_path: "{{ lookup('env', 'INSTALLATION_BASEPATH') }}/wireguard"
     # WireGuard configuration files.
 
     python3_venv_path: /tmp/Kseen715/python3-venv
     # Virtual environment for Python3. Just leave it as is.
 
-    wg_port: "51820"
-    wg_gui_port: "51821"
+    wg_port: "{{ lookup('env', 'WIREGUARD_PORT') }}"
+    wg_gui_port: "{{ lookup('env', 'WIREGUARD_WEB_GUI_PORT') }}"
   # ============================================================================
 
   hosts: "{{ host_group }}"
@@ -49,26 +49,18 @@
         state: directory
         mode: "0755"
 
-    - name: Ensure python3 is installed
+    - name: Ensure python3 and pip3 are installed
       become: yes
       apt:
-        name: python3
-        state: present
-
-    - name: Ensure pip3 is installed
-      become: yes
-      apt:
-        name: python3-pip
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
         state: present
 
     - name: Create a virtual environment and install Docker Python library
       become: yes
       block:
-        - name: Ensure python3-venv is installed
-          apt:
-            name: python3-venv
-            state: present
-
         - name: Create a virtual environment
           command: python3 -m venv {{ python3_venv_path }}
           args:

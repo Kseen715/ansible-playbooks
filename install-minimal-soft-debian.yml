@@ -10,5 +10,5 @@
       apt: name=btop state=present
     - name: Install micro
       apt: name=micro state=present
-    - name: Install neofetch
-      apt: name=neofetch state=present
+    - name: Install fastfetch
+      apt: name=fastfetch state=present
