@@ -13,7 +13,7 @@
     # For the container hostname.
 
     # <basepath>/x-ui
-    installation_path: "{{ lookup('env', 'INSTALLATION_BASEPATH') | default('/opt/vpn') }}/3x-ui"
+    installation_path: "{{ lookup('env', 'INSTALLATION_BASEPATH') }}/3x-ui"
 
     ansible_python3_path: /tmp/Kseen715/python3-venv
     # Virtual environment for Python3. Just leave it as is.

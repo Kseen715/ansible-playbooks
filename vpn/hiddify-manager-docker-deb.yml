@@ -1,0 +1,127 @@
+## Ansible playbook to install Hiddify-Manager on a linux-based system
+
+- name: Install Hiddify-Manager
+  become: yes
+
+  # ============================================================================
+  vars:
+    host_group: "{{ lookup('env', 'HOST_GROUP') }}"
+    # Your 'hosts', can be a group or a single host, e.g. 'localhost' if
+    # you want to run the playbook on the local machine.
+
+    port_https: "{{ lookup('env', 'HIDDIFY_MANAGER_PORT_HTTPS') }}"
+    port_http: "{{ lookup('env', 'HIDDIFY_MANAGER_PORT_HTTP') }}"
+
+    installation_path: "{{ lookup('env', 'INSTALLATION_BASEPATH') }}/hiddify-manager"
+
+    ansible_python3_path: /tmp/Kseen715/python3-venv
+    # Virtual environment for Python3. Just leave it as is.
+  # ============================================================================
+
+  hosts: "{{ host_group }}"
+  tasks:
+    - name: Update system
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Ensure Docker is installed
+      become: yes
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker
+      become: yes
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ensure installation path directory exists
+      become: yes
+      file:
+        path: "{{ installation_path }}"
+        state: directory
+        mode: "0755"
+
+    - name: Ensure python3 and pip3 are installed
+      become: yes
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+        state: present
+
+    - name: Create a virtual environment and install Docker Python library
+      become: yes
+      block:
+        - name: Create a virtual environment
+          command: python3 -m venv {{ ansible_python3_path }}
+          args:
+            creates: "{{ ansible_python3_path }}"
+
+        - name: Install Docker Python library in the virtual environment
+          command: "{{ ansible_python3_path }}/bin/pip install docker"
+
+    - name: Ensure GitHub is a known host
+      become: yes
+      shell: |
+        ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+      args:
+        creates: ~/.ssh/known_hosts
+
+    - name: Ensure repo directory does not exist
+      become: yes
+      file:
+        path: /tmp/vpn/Hiddify-Manager-repo
+        state: absent
+
+    - name: Deploy Hiddify-Manager
+      become: yes
+      block:
+        - name: Clone Hiddify-Manager repo
+          command: git clone https://github.com/hiddify/Hiddify-Manager.git "/tmp/vpn/Hiddify-Manager-repo" --depth=1
+
+        - name: Ensure Hiddify-Panel directory exists
+          file:
+            path: "{{ installation_path }}/hiddify-panel"
+            state: directory
+            mode: "0755"
+
+        - name: Ensure Hiddify-Panager DB exists
+          file:
+            path: "{{ installation_path }}/hiddify-panel/hiddifypanel.db"
+            state: touch
+            mode: "0755"
+
+        - name: Build Hiddify-Manager image
+          command: docker build -t hiddify-manager {{ installation_path }} -f "/tmp/vpn/Hiddify-Manager-repo/Dockerfile"
+
+        - name: Deploy Hiddify-Manager
+          vars:
+            ansible_python_interpreter: "{{ ansible_python3_path }}/bin/python3"
+          docker_container:
+            name: hiddify-manager
+            image: hiddify-manager
+            volumes:
+              - ./hiddify-panel/hiddifypanel.db:{{ installation_path }}/hiddify-panel/hiddifypanel.db
+              - ./ssl/:{{ installation_path }}/ssl/
+            ports:
+              - "{{ port_https }}:443"
+              - "{{ port_http }}:80"
+            capabilities:
+              - NET_ADMIN
+            tty: true
+            network_mode: host
+            restart_policy: unless-stopped
+            container_default_behavior: no_defaults
+
+    - name: Clear apt cache
+      apt:
+        autoclean: yes
+
+    - name: Print URL to access Hiddify-Manager
+      debug:
+        msg: "Access the Hiddify-Manager at http://{{ ansible_default_ipv4.address }}:{{ port_http }} or https://{{ ansible_default_ipv4.address }}:{{ port_https }}."
