@@ -20,3 +20,16 @@ Collection of VPN server setup scripts & etc.
 | [shadowsocks-rust](https://github.com/shadowsocks/shadowsocks-rust) | ShadowSocks | [<img src="https://raw.githubusercontent.com/devicons/devicon/6910f0503efdd315c8f9b858234310c06e04d9c0/icons/windows11/windows11-original.svg" title="windows" height="20"/>](https://github.com/shadowsocks/shadowsocks-windows) [<img src="https://github.com/user-attachments/assets/7c73febd-b16c-4fd0-92d2-bd94b0e75f9c" title="android-apk" height="20"/>](https://github.com/shadowsocks/shadowsocks-android) ||⚠️ WIP|
 | [wg-easy](https://github.com/wg-easy/wg-easy) | Wireguard | [<img src="https://raw.githubusercontent.com/devicons/devicon/6910f0503efdd315c8f9b858234310c06e04d9c0/icons/windows11/windows11-original.svg" title="windows" height="20"/>](https://download.wireguard.com/windows-client/wireguard-installer.exe) [<img src="https://github.com/user-attachments/assets/29013655-1aa9-4743-8dff-94a334cb447a" title="linux" height="20"/>](https://www.wireguard.com/install/) [<img src="https://github.com/user-attachments/assets/6a6e0a55-4fc8-4a07-b5dc-2a304501ffd8" title="macOS" height="20"/>](https://itunes.apple.com/us/app/wireguard/id1451685025?ls=1&mt=12) [<img src="https://github.com/user-attachments/assets/40aee79a-f3e4-40dc-b67d-149b6810f481" title="iOS" height="20"/>](https://itunes.apple.com/us/app/wireguard/id1441195209?ls=1&mt=8) [<img src="https://github.com/user-attachments/assets/7c73febd-b16c-4fd0-92d2-bd94b0e75f9c" title="android-google-play" height="20"/>](https://play.google.com/store/apps/details?id=com.wireguard.android) [<img src="https://github.com/user-attachments/assets/7c73febd-b16c-4fd0-92d2-bd94b0e75f9c" title="android-apk" height="20"/>](https://download.wireguard.com/android-client/com.wireguard.android-unknown.apk) | <ul><li>Web UI</li><li>user manager</li></ul> | ➡️ [ansible-playbook](https://github.com/Kseen715/ansible-playbooks/blob/main/vpn/wireguard-docker-deb.yml) | 
 <div id="auto-sort-end"/>
+
+## Providers
+
+### RUB
+
+- [WeaselCloud](https://weasel.cloud/)
+- [Xorek.Cloud](https://xorek.cloud)
+- [RU VDS](https://ruvds.com/)
+- [senko://digital](https://senko.digital/)
+
+### Untested
+
+- [Serv.Host](https://serv.host/)
