@@ -23,12 +23,12 @@ Collection of VPN server setup scripts & etc.
 
 ## Providers
 
-| Host | Region | RUB | USD | EUR | USDT | TON | Crypto |
-| ---- | ------ | --- | --- | --- | ---- | --- | ------ |
-| [WeaselCloud](https://weasel.cloud/) |
-| [Xorek.Cloud](https://xorek.cloud) |
-| [RU VDS](https://ruvds.com/) |
-| [senko://digital](https://senko.digital/) |
+| Host | Region | RUB | USD | EUR | PayPal | UnionPay | USDT | TON | Crypto |
+| ---- | ------ | --- | --- | --- | ------ | -------- | ---- | --- | ------ |
+| [WeaselCloud](https://weasel.cloud/) | 🇷🇺🇳🇱🇩🇪🇺🇸🇫🇷🇫🇮🇸🇪🇬🇧🇪🇪🇱🇻🇵🇱🇱🇹 | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ❔ | ✅ |
+| [Xorek.Cloud](https://xorek.cloud) | 🇷🇺🇳🇱🇩🇪 | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ |
+| [RU VDS](https://ruvds.com/) | 🇷🇺🇳🇱🇩🇪🇨🇭🇹🇷🇰🇿🇦🇲 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| [senko://digital](https://senko.digital/) | 🇩🇪🇫🇮 | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | 
 
 ### Untested
 
