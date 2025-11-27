@@ -29,7 +29,4 @@ Collection of VPN server setup scripts & etc.
 | [Xorek.Cloud](https://xorek.cloud) | 🇷🇺🇳🇱🇩🇪 | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ |
 | [RU VDS](https://ruvds.com/) | 🇷🇺🇳🇱🇩🇪🇨🇭🇹🇷🇰🇿🇦🇲 | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | [senko://digital](https://senko.digital/) | 🇩🇪🇫🇮 | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | 
-
-### Untested
-
-- [Serv.Host](https://serv.host/)
+| [Serv.Host](https://serv.host/) | 🇷🇺🇳🇱🇩🇪🇺🇸🇫🇷🇫🇮🇸🇪🇬🇧🇨🇭🇨🇿🇧🇪🇳🇴🇨🇦 | ❔ | ❔ | ❔ | ❔ | ❔ | ❔ | ❔ | ❔ |
